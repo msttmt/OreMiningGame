@@ -1,0 +1,6 @@
+name: Main
+version: '1.0-SNAPSHOT'
+main: plugin.oremininggame.Main
+api-version: '1.20'
+commands:
+  gameStart:
