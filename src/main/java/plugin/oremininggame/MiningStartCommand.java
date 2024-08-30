@@ -2,6 +2,7 @@ package plugin.oremininggame;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.SplittableRandom;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -34,32 +35,15 @@ public class MiningStartCommand implements CommandExecutor , Listener {
   public boolean onCommand(CommandSender sender, Command command, String s,
       String[] strings) {
     if (sender instanceof Player player) {
-      if(playerScoreList.isEmpty()) {
-        addNewPlayer(player);
-      }else{
-        for(PlayerScore playerScore : playerScoreList){
-          if(!playerScore.getPlayerName().equals(player.getName())){
-            addNewPlayer(player);
-          }
-        }
-      }
-
-      idleTime = 5; //初期化
-      Bukkit.getScheduler().runTaskTimer(main,Runnable ->{
-        if(idleTime == 0){
-          Runnable.cancel();
-          player.sendTitle("Game Start!","何点とれるかな？");
-          return;
-        }
-        player.sendTitle("開始まで"," "+idleTime+" ");
-        idleTime--;
-      },0,5 * 4);
+      PlayerScore nowPlayer = getPlayerScore(player);
+      World world = player.getWorld(); //playerのワールド情報を取得して変数として定義
 
       player.setHealth(20);
       player.setFoodLevel(20);
-      World world = player.getWorld(); //playerのワールド情報を取得して変数として定義
 
+      idleTimer(player); //待機時間カウント
       setLocation(player, world); //playerの縦横30の距離で採掘場の生成
+
       player.sendMessage("チェストにアイテムを移動しました。ピッケルを渡しました。");
       player.getInventory().setItemInMainHand(new ItemStack(Material.NETHERITE_PICKAXE));
       player.sendMessage("このピッケルで鉱石の塊を採掘して高得点を狙ってください。");
@@ -68,7 +52,8 @@ public class MiningStartCommand implements CommandExecutor , Listener {
       Bukkit.getScheduler().runTaskTimer(main,Runnable ->{
         if(gameTime <= 0){
           Runnable.cancel();
-          player.sendTitle("ゲーム終了","スコア");
+          player.sendTitle("ゲーム終了","スコア" + nowPlayer.getScore());
+          nowPlayer.setScore(0);
           return;
         }
         gameTime--;
@@ -78,25 +63,48 @@ public class MiningStartCommand implements CommandExecutor , Listener {
     return false;
   }
 
+  private void idleTimer(Player player) {
+    idleTime = 6; //初期化
+    Bukkit.getScheduler().runTaskTimer(main,Runnable ->{
+      if(idleTime == 0){
+        Runnable.cancel();
+        player.sendTitle("Game Start!","何点とれるかな？");
+        return;
+      }else if(idleTime == 6) {
+        idleTime--;
+      }else{
+        player.sendTitle("開始まで", " " + idleTime + " ");
+        idleTime--;
+      }
+    },0,5 * 4);
+  }
 
 
   @EventHandler
   public void onBlockBreak(BlockBreakEvent e) {
     Player player = e.getPlayer();
     Block block = e.getBlock();
-    if(Objects.isNull(player) || playerScoreList.isEmpty()){
+    if(Objects.isNull(player) || playerScoreList.isEmpty()) {
       return;
     }
 
-    for(PlayerScore playerScore : playerScoreList){
-    if(playerScore.getPlayerName().equals(player.getName())) {
-      playerScore.setScore(playerScore.getScore() + 10);
-      player.sendMessage("スコア：" + playerScore.getScore());
-      }
-    }
-
-    //点数のバリエーション
-
+    playerScoreList.stream()
+        .filter( p -> p.getPlayerName().equals(player.getName()))
+        .findFirst()
+        .ifPresent(p -> {int point = switch (block.getType()) {
+          case DIAMOND_ORE -> 100;
+          case IRON_ORE, COAL_ORE -> 1;
+          case COPPER_ORE -> 10;
+          case GOLD_ORE -> 20;
+          case LAPIS_ORE -> 30;
+          case EMERALD_ORE -> 80;
+          case REDSTONE_ORE -> 5;
+          default -> 0;
+        };
+          p.setScore(p.getScore() + point);
+          player.sendMessage(
+              player.getName() + " " + point + "点。現在のスコア: " + p.getScore() + "点");
+        });
   }
 
   private static void setLocation(Player player, World world) {
@@ -104,7 +112,6 @@ public class MiningStartCommand implements CommandExecutor , Listener {
     double x = playerLocation.getX();
     double y = playerLocation.getY();
     double z = playerLocation.getZ();
-
 
     //採掘ステージを作る
     for (int i = -2; i < 30; i++) {
@@ -115,6 +122,7 @@ public class MiningStartCommand implements CommandExecutor , Listener {
         }
       }
     }
+
     //中を空洞
     for (int i = -1; i < 29; i++) {
       for (int j = -1; j < 29; j++) {
@@ -124,6 +132,7 @@ public class MiningStartCommand implements CommandExecutor , Listener {
         }
       }
     }
+
     //鉱石ブロックの塊を生成
     for (int i = 3; i < 25; i++) {
       for (int j = 0; j < 25; j++) {
@@ -137,7 +146,7 @@ public class MiningStartCommand implements CommandExecutor , Listener {
             case 2 -> world.getBlockAt(new Location(world, x+i, y+j, z+k))
                 .setType(Material.IRON_ORE);
             case 3 -> world.getBlockAt(new Location(world, x+i, y+j, z+k))
-                .setType(Material.COAL_ORE );
+                .setType(Material.COAL_ORE);
             case 4 -> world.getBlockAt(new Location(world, x+i, y+j, z+k))
                 .setType(Material.LAPIS_ORE);
             case 5 -> world.getBlockAt(new Location(world, x+i, y+j, z+k))
@@ -145,7 +154,7 @@ public class MiningStartCommand implements CommandExecutor , Listener {
             case 6 -> world.getBlockAt(new Location(world, x+i, y+j, z+k))
                 .setType(Material.SAND);
             case 7 -> world.getBlockAt(new Location(world, x+i, y+j, z+k))
-                .setType(Material.EMERALD_ORE );
+                .setType(Material.EMERALD_ORE);
             case 8 -> world.getBlockAt(new Location(world, x+i, y+j, z+k))
                 .setType(Material.STONE);
             case 9 -> world.getBlockAt(new Location(world, x+i, y+j, z+k))
@@ -191,12 +200,35 @@ public class MiningStartCommand implements CommandExecutor , Listener {
     }
 
   /**
+   * 現在実行しているプレイヤーのスコア情報を取得
+   * @param player　コマンドを実行したプレイヤー
+   * @return 現在実行しているプレイヤーのスコア加算
+   */
+
+    private PlayerScore getPlayerScore(Player player) {
+    if(playerScoreList.isEmpty()) {
+      return addNewPlayer(player);
+    }else{
+      for(PlayerScore playerScore : playerScoreList){
+        if(!playerScore.getPlayerName().equals(player.getName())){
+          return addNewPlayer(player);
+        }else{
+          return playerScore;
+        }
+      }
+    }
+      return null;
+    }
+
+
+  /**
    新規プレイヤー情報をリストに追加
    */
-  private void addNewPlayer(Player player) {
-    PlayerScore playerScore = new PlayerScore();
-    playerScore.setPlayerName(player.getName()); //playerScoreリストにコマンド実行したプレイヤーの名前を取得
-    playerScoreList.add(playerScore); //追加
+  private PlayerScore addNewPlayer(Player player) {
+    PlayerScore newPlayer = new PlayerScore();
+    newPlayer.setPlayerName(player.getName()); //playerScoreリストにコマンド実行したプレイヤーの名前を取得
+    playerScoreList.add(newPlayer); //追加
+    return newPlayer;
   }
 }
 

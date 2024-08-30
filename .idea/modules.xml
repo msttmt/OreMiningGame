@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/OreMiningGame.main.iml" filepath="$PROJECT_DIR$/.idea/modules/OreMiningGame.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/plugin.OreMiningGame.main.iml" filepath="$PROJECT_DIR$/.idea/modules/plugin.OreMiningGame.main.iml" />
     </modules>
   </component>
 </project>

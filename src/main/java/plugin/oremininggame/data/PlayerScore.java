@@ -15,5 +15,4 @@ public class PlayerScore {
  private String playerName;
  private int score;
 
-
 }
