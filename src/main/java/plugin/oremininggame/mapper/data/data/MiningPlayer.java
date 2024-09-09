@@ -1,17 +1,16 @@
-package plugin.oremininggame.data;
+package plugin.oremininggame.mapper.data.data;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.entity.Player;
 
 /**
- * ゲームを実行する際のスコア情報を扱うオブジェクト
+ * ゲームを実行する際のplayer情報を扱うオブジェクト
  * プレイヤー名、合計点数、日時情報を持つ
  */
 @Getter
 @Setter
 
-public class PlayerScore {
+public class MiningPlayer {
  private String playerName;
  private int score;
 

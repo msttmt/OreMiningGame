@@ -1,40 +1,69 @@
-package plugin.oremininggame;
+package plugin.oremininggame.command;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import plugin.oremininggame.data.PlayerScore;
+import plugin.oremininggame.BossBarManager;
+import plugin.oremininggame.Main;
+import plugin.oremininggame.scoredata.PlayerScoreData;
+import plugin.oremininggame.scoredata.ScoreboardManager;
+import plugin.oremininggame.createStage;
+import plugin.oremininggame.mapper.data.PlayerScore;
+import plugin.oremininggame.mapper.data.data.MiningPlayer;
 
 public class MiningStartCommand extends BaseCommand implements Listener {
 
-  private Main main;
-  private final List<PlayerScore> playerScoreList = new ArrayList<>();
+  private final Main main;
+  private final List<MiningPlayer> miningPlayerList = new ArrayList<>();
   private int nowGameTime;
   private int idleTime;
   private boolean isPointCountEnd = true;
   private BossBarManager bossBarManager;
   private final ScoreboardManager scoreboardManager = new ScoreboardManager();
-  private final String LIST = "list";
+  private final SqlSessionFactory sqlSessionFactory;
+  private final PlayerScoreData playerScoreData = new PlayerScoreData();
 
   public MiningStartCommand(Main main) {
     this.main = main;
+
+    try {
+      InputStream inputStream = Resources.getResourceAsStream("mybatis-config.xml");
+      this.sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
-  public boolean onMiningPlayerCommand(Player player) {
-    PlayerScore nowPlayer = getPlayerScore(player);
+  public boolean onMiningPlayerCommand(Player player, Command command,String label,String args[]) {
+    if(args.length == 1 && args[0].equals("list")){
+      List<PlayerScore> playerScoreList = playerScoreData.selectList();
+      for (PlayerScore playerScore : playerScoreList) {
+        player.sendMessage(playerScore.getId() + " | "
+            + playerScore.getPlayerName() + " | "
+            + playerScore.getScore() + " | "
+            + playerScore.getRegisteredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+      }
+      return false;
+    }
+
+    MiningPlayer nowPlayer = getPlayerScore(player);
     player.setHealth(20);
     player.setFoodLevel(20);
     idleTimer(player); //待機時間カウント
@@ -50,8 +79,8 @@ public class MiningStartCommand extends BaseCommand implements Listener {
 
 
 
-  private void timeScheduler(Player player, PlayerScore nowPlayer) {
-    nowGameTime = 60; //初期化
+  private void timeScheduler(Player player, MiningPlayer nowPlayer) {
+    nowGameTime = 120; //初期化
     bossBarManager = new BossBarManager();
     bossBarManager.showBossBar(player);
     Bukkit.getScheduler().runTaskTimer(main, Runnable -> {
@@ -61,12 +90,14 @@ public class MiningStartCommand extends BaseCommand implements Listener {
           Runnable.cancel();
           scoreboardManager.updateCurrentScore(player, nowPlayer.getScore());
           player.sendTitle("Score " + nowPlayer.getScore() + "点","ゲーム終了～！");
+
+          playerScoreData.insert(new PlayerScore(nowPlayer.getPlayerName(), nowPlayer.getScore()));
           nowPlayer.setScore(0);
           bossBarManager.hideBossBar(player);
           isPointCountEnd = true;
           scoreboardManager.clearScore(player);
           return;
-        }else if(nowGameTime < 6 && nowGameTime != 0) {
+        }else if(nowGameTime < 6) {
           player.sendTitle( " " + nowGameTime + " ","");
         }
         nowGameTime--;
@@ -99,11 +130,11 @@ public class MiningStartCommand extends BaseCommand implements Listener {
   public void onBlockBreak(BlockBreakEvent e) {
     Player player = e.getPlayer();
     Block block = e.getBlock();
-    if (Objects.isNull(player) || playerScoreList.isEmpty() || isPointCountEnd) {
+    if (Objects.isNull(player) || miningPlayerList.isEmpty() || isPointCountEnd) {
       return;
     }
 
-    playerScoreList.stream().filter(p -> p.getPlayerName().equals(player.getName())).findFirst()
+    miningPlayerList.stream().filter(p -> p.getPlayerName().equals(player.getName())).findFirst()
         .ifPresent(p -> {
           int point = switch (block.getType()) {
             case DIAMOND_ORE -> 100;
@@ -131,15 +162,15 @@ public class MiningStartCommand extends BaseCommand implements Listener {
    * @return 現在実行しているプレイヤーのスコア加算
    */
 
-  private PlayerScore getPlayerScore(Player player) {
-    if (playerScoreList.isEmpty()) {
+  private MiningPlayer getPlayerScore(Player player) {
+    if (miningPlayerList.isEmpty()) {
       return addNewPlayer(player);
     } else {
-      for (PlayerScore playerScore : playerScoreList) {
-        if (!playerScore.getPlayerName().equals(player.getName())) {
-          return addNewPlayer(player);
+      for (MiningPlayer miningPlayer : miningPlayerList) {
+        if (miningPlayer.getPlayerName().equals(player.getName())) {
+          return miningPlayer;
         } else {
-          return playerScore;
+          return addNewPlayer(player);
         }
       }
     }
@@ -150,15 +181,15 @@ public class MiningStartCommand extends BaseCommand implements Listener {
   /**
    * 新規プレイヤー情報をリストに追加
    */
-  private PlayerScore addNewPlayer(Player player) {
-    PlayerScore newPlayer = new PlayerScore();
+  private MiningPlayer addNewPlayer(Player player) {
+    MiningPlayer newPlayer = new MiningPlayer();
     newPlayer.setPlayerName(player.getName()); //playerScoreリストにコマンド実行したプレイヤーの名前を取得
-    playerScoreList.add(newPlayer); //追加
+    miningPlayerList.add(newPlayer); //追加
     return newPlayer;
   }
 
   @Override
-  public boolean onMiningNPCCommand(CommandSender sender) {
+  public boolean onMiningNPCCommand(CommandSender sender,Command command, String label, String[] args) {
     return false;
   }
 }

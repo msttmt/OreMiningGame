@@ -2,6 +2,7 @@ package plugin.oremininggame;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import plugin.oremininggame.command.MiningStartCommand;
 
 public final class Main extends JavaPlugin {
 

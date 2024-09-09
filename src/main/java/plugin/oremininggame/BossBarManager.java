@@ -4,7 +4,6 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class BossBarManager {
   private final BossBar bossBar;
@@ -18,7 +17,7 @@ public class BossBarManager {
   }
 
   public void updateBossBar(int time) {
-    bossBar.setProgress((double)time / 60);
+    bossBar.setProgress((double)time / 120);
     bossBar.setTitle("残り時間: " + time + "秒");
   }
 

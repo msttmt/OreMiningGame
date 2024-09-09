@@ -1,4 +1,4 @@
-package plugin.oremininggame;
+package plugin.oremininggame.scoredata;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
