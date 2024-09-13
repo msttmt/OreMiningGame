@@ -17,14 +17,14 @@ public class ScoreboardManager {
 
     // スコアの設定
     setScore(objective, "現在のスコア", 0); // プレイヤーの現在のスコアは0で初期化
-    setScore(objective, ChatColor.AQUA +"ダイヤモンド", 100);
-    setScore(objective, ChatColor.GRAY +"鉄鉱石", 1);
-    setScore(objective, ChatColor.DARK_GRAY +"石炭", 1);
-    setScore(objective, ChatColor.GOLD +"銅鉱石", 10);
-    setScore(objective, ChatColor.YELLOW +"金鉱石", 20);
-    setScore(objective, ChatColor.BLUE +"ラピスラズリ", 30);
-    setScore(objective, ChatColor.GREEN +"エメラルド", 80);
-    setScore(objective, ChatColor.RED +"レッドストーン", 5);
+    setScore(objective, ChatColor.AQUA + "ダイヤモンド", 100);
+    setScore(objective, ChatColor.GRAY + "鉄鉱石", 1);
+    setScore(objective, ChatColor.DARK_GRAY + "石炭", 1);
+    setScore(objective, ChatColor.GOLD + "銅鉱石", 10);
+    setScore(objective, ChatColor.YELLOW + "金鉱石", 20);
+    setScore(objective, ChatColor.BLUE + "ラピスラズリ", 30);
+    setScore(objective, ChatColor.GREEN + "エメラルド", 80);
+    setScore(objective, ChatColor.RED + "レッドストーン", 5);
 
     // プレイヤーにスコアボードを設定
     player.setScoreboard(scoreboard);
@@ -46,7 +46,7 @@ public class ScoreboardManager {
     }
   }
 
-  public void clearScore(Player player){
+  public void clearScore(Player player) {
     Scoreboard newScoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
     player.setScoreboard(newScoreboard);
   }

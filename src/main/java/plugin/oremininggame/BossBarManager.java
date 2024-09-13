@@ -1,4 +1,5 @@
 package plugin.oremininggame;
+
 import org.bukkit.Bukkit;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -6,6 +7,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 
 public class BossBarManager {
+
   private final BossBar bossBar;
 
   public BossBarManager() {
@@ -17,7 +19,7 @@ public class BossBarManager {
   }
 
   public void updateBossBar(int time) {
-    bossBar.setProgress((double)time / 120);
+    bossBar.setProgress((double) time / 120);
     bossBar.setTitle("残り時間: " + time + "秒");
   }
 

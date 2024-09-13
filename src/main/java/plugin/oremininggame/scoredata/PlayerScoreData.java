@@ -15,34 +15,35 @@ import plugin.oremininggame.mapper.data.PlayerScoreMapper;
  * MyBatisを使用してSQLセッションを確立し、プレイヤースコアのCRUD操作をPlayerScoreMapperを通じて実行します。
  */
 public class PlayerScoreData {
-    private final PlayerScoreMapper mapper;
 
-    public PlayerScoreData() {
-      try {
-        InputStream inputStream = Resources.getResourceAsStream("mybatis-config.xml");
-        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
-        SqlSession session = sqlSessionFactory.openSession(true);
-        this.mapper = session.getMapper(PlayerScoreMapper.class);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
+  private final PlayerScoreMapper mapper;
 
-    /**
-     * プレイヤースコアテーブルから一覧でスコア情報を取得する。
-     *
-     * @return スコア引数
-     */
-    public List<PlayerScore> selectList() {
-      return mapper.selectList();
-    }
-
-    /**
-     * プレイヤースコアテーブルにスコア情報を登録する。
-     *
-     * @param playerScore プレイヤースコア
-     */
-    public void insert(PlayerScore playerScore) {
-      mapper.insert(playerScore);
+  public PlayerScoreData() {
+    try {
+      InputStream inputStream = Resources.getResourceAsStream("mybatis-config.xml");
+      SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+      SqlSession session = sqlSessionFactory.openSession(true);
+      this.mapper = session.getMapper(PlayerScoreMapper.class);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
+
+  /**
+   * プレイヤースコアテーブルから一覧でスコア情報を取得する。
+   *
+   * @return スコア引数
+   */
+  public List<PlayerScore> selectList() {
+    return mapper.selectList();
+  }
+
+  /**
+   * プレイヤースコアテーブルにスコア情報を登録する。
+   *
+   * @param playerScore プレイヤースコア
+   */
+  public void insert(PlayerScore playerScore) {
+    mapper.insert(playerScore);
+  }
+}

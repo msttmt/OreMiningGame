@@ -51,14 +51,16 @@ public class MiningStartCommand extends BaseCommand implements Listener {
   }
 
   @Override
-  public boolean onMiningPlayerCommand(Player player, Command command,String label,String args[]) {
-    if(args.length == 1 && args[0].equals("list")){
+  public boolean onMiningPlayerCommand(Player player, Command command, String label,
+      String args[]) {
+    if (args.length == 1 && args[0].equals("list")) {
       List<PlayerScore> playerScoreList = playerScoreData.selectList();
       for (PlayerScore playerScore : playerScoreList) {
         player.sendMessage(playerScore.getId() + " | "
             + playerScore.getPlayerName() + " | "
             + playerScore.getScore() + " | "
-            + playerScore.getRegisteredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            + playerScore.getRegisteredAt()
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
       }
       return false;
     }
@@ -78,18 +80,17 @@ public class MiningStartCommand extends BaseCommand implements Listener {
   }
 
 
-
   private void timeScheduler(Player player, MiningPlayer nowPlayer) {
     nowGameTime = 120; //初期化
     bossBarManager = new BossBarManager();
     bossBarManager.showBossBar(player);
     Bukkit.getScheduler().runTaskTimer(main, Runnable -> {
-      if(!isPointCountEnd) {
+      if (!isPointCountEnd) {
         bossBarManager.updateBossBar(nowGameTime);
         if (nowGameTime == 0) {
           Runnable.cancel();
           scoreboardManager.updateCurrentScore(player, nowPlayer.getScore());
-          player.sendTitle("Score " + nowPlayer.getScore() + "点","ゲーム終了～！");
+          player.sendTitle("Score " + nowPlayer.getScore() + "点", "ゲーム終了～！");
 
           playerScoreData.insert(new PlayerScore(nowPlayer.getPlayerName(), nowPlayer.getScore()));
           nowPlayer.setScore(0);
@@ -97,12 +98,12 @@ public class MiningStartCommand extends BaseCommand implements Listener {
           isPointCountEnd = true;
           scoreboardManager.clearScore(player);
           return;
-        }else if(nowGameTime < 6) {
-          player.sendTitle( " " + nowGameTime + " ","");
+        } else if (nowGameTime < 6) {
+          player.sendTitle(" " + nowGameTime + " ", "");
         }
         nowGameTime--;
       }
-      }, 0L, 20L);  //DAY17 タイムランナー
+    }, 0L, 20L);  //DAY17 タイムランナー
   }
 
   /**
@@ -118,7 +119,7 @@ public class MiningStartCommand extends BaseCommand implements Listener {
       } else if (idleTime == 6) {
         idleTime--;
       } else {
-        player.sendTitle( " " + idleTime + " ","");
+        player.sendTitle(" " + idleTime + " ", "");
         idleTime--;
       }
     }, 0, 20);
@@ -147,12 +148,11 @@ public class MiningStartCommand extends BaseCommand implements Listener {
             default -> 0;
           };
           p.setScore(p.getScore() + point);
-          if(point != 0) {
+          if (point != 0) {
             scoreboardManager.updateCurrentScore(player, p.getScore());
           }
         });
   }
-
 
 
   /**
@@ -189,7 +189,8 @@ public class MiningStartCommand extends BaseCommand implements Listener {
   }
 
   @Override
-  public boolean onMiningNPCCommand(CommandSender sender,Command command, String label, String[] args) {
+  public boolean onMiningNPCCommand(CommandSender sender, Command command, String label,
+      String[] args) {
     return false;
   }
 }

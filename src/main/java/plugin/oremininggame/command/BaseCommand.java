@@ -15,29 +15,33 @@ public abstract class BaseCommand implements CommandExecutor {
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
     if (sender instanceof Player player) {
       try {
-        return onMiningPlayerCommand(player,command,label,args);
+        return onMiningPlayerCommand(player, command, label, args);
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
     } else {
-      return onMiningNPCCommand(sender,command,label,args);
+      return onMiningNPCCommand(sender, command, label, args);
     }
   }
 
   /**
    * コマンド実行者がプレイヤーだった場合に実行
-   * @param player プレイヤー
+   *
+   * @param player  プレイヤー
    * @param command コマンド
-   * @param label ラベル
+   * @param label   ラベル
    */
-  public abstract boolean onMiningPlayerCommand(Player player,Command command, String label, String[] args) throws IOException;
+  public abstract boolean onMiningPlayerCommand(Player player, Command command, String label,
+      String[] args) throws IOException;
 
   /**
    * コマンド実行者がプレイヤー以外だった場合
-   * @param sender コマンド実行者
+   *
+   * @param sender  コマンド実行者
    * @param command コマンド
-   * @param label ラベル
+   * @param label   ラベル
    */
-  public abstract boolean onMiningNPCCommand(CommandSender sender,Command command, String label, String[] args);
+  public abstract boolean onMiningNPCCommand(CommandSender sender, Command command, String label,
+      String[] args);
 
 }

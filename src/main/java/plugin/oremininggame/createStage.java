@@ -11,6 +11,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class createStage {
+
   public static void setLocation(Player player, World world) {
     Location playerLocation = player.getLocation();
     double x = playerLocation.getX();
