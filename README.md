@@ -16,6 +16,21 @@
 >- 砂ブロックは時にあなたを手助けしてくれます。が、頭上に降ってくるとダメージを負います。体力と空腹値はゲーム開始時に全回復するため死なないとは思いますが……、万が一のこともあるので気を付けましょう。
 >- 掘った鉱石とピッケルはお持ち帰りいただいて構いません。ドアのご用意がございませんのでお帰りの際はお近くの壁を壊して脱出してください。お忘れ物が多くなっておりますので、最初に生成しました2つの宝箱の中身とお手荷物を今一度ご確認のうえ、ご退出ください。　　
 
+## プレイ説明動画
+
+
+https://github.com/user-attachments/assets/f1c3df88-dab0-443f-a3fc-b504e358083e
+
+
+
+https://github.com/user-attachments/assets/7dcbc294-3ab7-405a-a259-2ff179ea429a
+
+
+
+https://github.com/user-attachments/assets/3ad6b3b6-a9a5-4b35-b6e1-d77e6017ce45
+
+
+
 >[!TIP]
 >### データベース設計
 >|属性|設定値|
@@ -37,7 +52,7 @@
 >USE spigot_server;
 >```
 >```
->CREATE TABLE  player_score(id int auto_increment, score int, registered_at datetime, primary key(id)) DEFAULT CHARSET=utf8;
+>CREATE TABLE  player_score(id int auto_increment, score int, registered_at datetime, player_name varchar(255), primary key(id)) DEFAULT CHARSET=utf8;
 >```
 >
 >3. MySQLのurl,username,passwordはご自身のローカル環境に合わせてご使用ください。(mybatis-config.xmlで設定します。)　　
